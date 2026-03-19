@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Proprietario</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+    <main class="dashboard-wrap">
+        <header class="header">
+            <div>
+                <p class="brand">Sovereign Suite</p>
+                <h1>Gestao de Reservas</h1>
+            </div>
+            <div class="search">
+                <form method="get" action="{{ url_for('exportar_excel_mes') }}">
+                    <input name="month" type="month" value="{{ export_month }}" required>
+                    <button type="submit">Exportar Excel</button>
+                </form>
+                <form method="post" action="{{ url_for('logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit">Sair</button>
+                </form>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="flash-stack">
+                    {% for category, message in messages %}
+                        <p class="flash flash-{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <section class="panel">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Hospede</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Status</th>
+                        <th>Acoes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations %}
+                        <tr>
+                            <td>#{{ reservation.id }}</td>
+                            <td>{{ reservation.nome }}</td>
+                            <td>{{ reservation.checkin }}</td>
+                            <td>{{ reservation.checkout }}</td>
+                            <td>
+                                <span class="status status-{{ reservation.status }}">{{ reservation.status }}</span>
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <button
+                                        class="small detail-btn"
+                                        type="button"
+                                        data-id="{{ reservation.id }}"
+                                        data-name="{{ reservation.nome }}"
+                                        data-phone="{{ reservation.telefone }}"
+                                        data-checkin="{{ reservation.checkin }}"
+                                        data-checkout="{{ reservation.checkout }}"
+                                        data-notes="{{ reservation.observacoes }}"
+                                        data-status="{{ reservation.status }}"
+                                        data-receipt-url="{{ reservation.comprovante_url_publica }}"
+                                        data-created="{{ reservation.created_at }}"
+                                    >
+                                        Detalhes
+                                    </button>
+
+                                    <form method="post" action="{{ url_for('confirmar_entrada', reserva_id=reservation.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="small confirm" type="submit">Confirmar Entrada</button>
+                                    </form>
+
+                                    <form method="post" action="{{ url_for('confirmar_total', reserva_id=reservation.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="small reject" type="submit">Confirmar Total</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6">Nenhuma reserva encontrada.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <div id="details-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <button id="close-modal" class="close" type="button">Fechar</button>
+            <h2 id="modal-title">Detalhes da Reserva</h2>
+            <dl>
+                <div><dt>ID</dt><dd id="m-id"></dd></div>
+                <div><dt>Hospede</dt><dd id="m-name"></dd></div>
+                <div><dt>WhatsApp</dt><dd id="m-phone"></dd></div>
+                <div><dt>Check-in</dt><dd id="m-checkin"></dd></div>
+                <div><dt>Check-out</dt><dd id="m-checkout"></dd></div>
+                <div><dt>Status</dt><dd id="m-status"></dd></div>
+                <div><dt>Criado em</dt><dd id="m-created"></dd></div>
+                <div><dt>Observacoes</dt><dd id="m-notes"></dd></div>
+                <div><dt>Comprovante</dt><dd><a id="m-receipt" href="#" target="_blank" rel="noopener">Abrir arquivo</a></dd></div>
+            </dl>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

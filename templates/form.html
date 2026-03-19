@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Reserva</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/form.css') }}">
+</head>
+<body>
+    <main class="wrap">
+        <section class="card">
+            <p class="eyebrow">Sovereign Suite</p>
+            <h1>Solicitar reserva</h1>
+            <p class="subtitle">Envie seus dados e o comprovante de pagamento para validacao rapida.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alerts">
+                        {% for category, message in messages %}
+                            <p class="alert alert-{{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('create_reservation') }}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="guest_name">Nome completo</label>
+                <input id="guest_name" name="guest_name" required>
+
+                <label for="cpf">CPF</label>
+                <input id="cpf" name="cpf" placeholder="000.000.000-00" required>
+
+                <label for="guest_phone">WhatsApp</label>
+                <input id="guest_phone" name="guest_phone" placeholder="+55..." required>
+
+                <label for="entry_amount">Valor de entrada (R$)</label>
+                <input id="entry_amount" name="entry_amount" type="number" min="0" step="0.01" required>
+
+                <label for="room">Quarto</label>
+                <input id="room" name="room" placeholder="Ex: Suite Imperial" required>
+
+                <div class="grid">
+                    <div>
+                        <label for="checkin_date">Check-in</label>
+                        <input id="checkin_date" name="checkin_date" type="date" required>
+                    </div>
+                    <div>
+                        <label for="checkout_date">Check-out</label>
+                        <input id="checkout_date" name="checkout_date" type="date" required>
+                    </div>
+                </div>
+
+                <label for="notes">Observacoes</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Opcional"></textarea>
+
+                <label for="receipt_file">Comprovante de pagamento</label>
+                <input id="receipt_file" name="receipt_file" type="file" required>
+
+                <button type="submit">Enviar Reserva</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
