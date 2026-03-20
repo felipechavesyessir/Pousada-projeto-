@@ -27,11 +27,22 @@
             {% endwith %}
 
             <form action="{{ url_for('create_reservation') }}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                 <label for="guest_name">Nome completo</label>
                 <input id="guest_name" name="guest_name" required>
 
+                <label for="cpf">CPF</label>
+                <input id="cpf" name="cpf" placeholder="000.000.000-00" required>
+
                 <label for="guest_phone">WhatsApp</label>
-                <input id="guest_phone" name="guest_phone" placeholder="whatsapp:+55..." required>
+                <input id="guest_phone" name="guest_phone" placeholder="+55..." required>
+
+                <label for="entry_amount">Valor de entrada (R$)</label>
+                <input id="entry_amount" name="entry_amount" type="number" min="0" step="0.01" required>
+
+                <label for="room">Quarto</label>
+                <input id="room" name="room" placeholder="Ex: Suite Imperial" required>
 
                 <div class="grid">
                     <div>
