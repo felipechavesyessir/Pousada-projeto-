@@ -1,10 +1,11 @@
 :root {
-    --bg: #f6f2ea;
+    --bg: #f7eef1;
     --card: rgba(255, 255, 255, 0.86);
-    --text: #202020;
-    --muted: #666155;
-    --accent: #9f6f3d;
-    --line: #d8c6b1;
+    --text: #3a1d28;
+    --muted: #7b5863;
+    --accent: #955251;
+    --line: #e3cfd6;
+    --heritage-illustration: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'%3E%3Cg fill='none' stroke='%23955251' stroke-opacity='.2' stroke-width='2'%3E%3Cpath d='M0 690h1600'/%3E%3Cpath d='M0 730h1600'/%3E%3C/g%3E%3Cg fill='%23955251' fill-opacity='.09'%3E%3Cpath d='M70 620h250v130H70z'/%3E%3Cpath d='M340 590h180v160H340z'/%3E%3Cpath d='M540 610h150v140H540z'/%3E%3Cpath d='M710 560h190v190H710z'/%3E%3Cpath d='M930 610h220v140H930z'/%3E%3Cpath d='M1170 585h170v165h-170z'/%3E%3Cpath d='M1360 620h170v130h-170z'/%3E%3C/g%3E%3Cg fill='%23955251' fill-opacity='.13'%3E%3Cpath d='M365 530l65-70 65 70z'/%3E%3Cpath d='M745 530l60-80 60 80z'/%3E%3Cpath d='M1195 545l60-70 60 70z'/%3E%3C/g%3E%3Cg fill='none' stroke='%23955251' stroke-opacity='.16' stroke-width='4'%3E%3Cpath d='M70 620l125-95 125 95'/%3E%3Cpath d='M930 610l110-85 110 85'/%3E%3C/g%3E%3Cg fill='%23955251' fill-opacity='.11'%3E%3Crect x='783' y='390' width='44' height='170' rx='6'/%3E%3Crect x='754' y='345' width='102' height='50' rx='6'/%3E%3Cpath d='M805 290l55 55h-110z'/%3E%3Crect x='150' y='650' width='30' height='100'/%3E%3Crect x='225' y='650' width='30' height='100'/%3E%3Crect x='980' y='650' width='30' height='100'/%3E%3Crect x='1065' y='650' width='30' height='100'/%3E%3C/g%3E%3Cpath d='M0 760c210-30 330-15 470 10s255 35 425 0 360-35 705 10v120H0z' fill='%23955251' fill-opacity='.06'/%3E%3C/svg%3E");
 }
 
 * {
@@ -14,12 +15,46 @@
 body {
     margin: 0;
     min-height: 100vh;
+    position: relative;
     font-family: "Instrument Sans", sans-serif;
     color: var(--text);
     background:
-        radial-gradient(circle at 15% 20%, rgba(255, 225, 181, 0.45), transparent 45%),
-        radial-gradient(circle at 85% 0%, rgba(196, 166, 127, 0.28), transparent 38%),
-        linear-gradient(150deg, #f8f5ee 0%, #efe6d8 100%);
+        radial-gradient(circle at 15% 20%, rgba(149, 82, 81, 0.2), transparent 45%),
+        radial-gradient(circle at 85% 0%, rgba(122, 61, 77, 0.18), transparent 38%),
+        linear-gradient(150deg, #fbf4f6 0%, #f2e4e9 100%);
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: var(--heritage-illustration);
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: min(1900px, 140vw) auto;
+    opacity: 0.8;
+    transform: scale(1.02);
+    animation: heritage-pan 9s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes heritage-pan {
+    0% {
+        background-position: 47% 100%;
+        transform: scale(1.02);
+        opacity: 0.76;
+    }
+    50% {
+        background-position: 53% 100%;
+        transform: scale(1.045);
+        opacity: 0.86;
+    }
+    100% {
+        background-position: 47% 100%;
+        transform: scale(1.02);
+        opacity: 0.76;
+    }
 }
 
 .wrap {
@@ -27,16 +62,18 @@ body {
     display: grid;
     place-items: center;
     padding: 24px;
+    position: relative;
+    z-index: 1;
 }
 
 .card {
     width: min(680px, 100%);
     background: var(--card);
-    border: 1px solid rgba(216, 198, 177, 0.75);
+    border: 1px solid rgba(149, 82, 81, 0.24);
     backdrop-filter: blur(6px);
     border-radius: 24px;
     padding: 32px;
-    box-shadow: 0 18px 40px rgba(74, 51, 20, 0.12);
+    box-shadow: 0 18px 40px rgba(74, 39, 51, 0.14);
     animation: card-in 450ms ease;
 }
 
@@ -85,7 +122,7 @@ form {
 
 label {
     font-size: 0.9rem;
-    color: #4b4336;
+    color: #6b4653;
 }
 
 input,
@@ -101,8 +138,8 @@ textarea {
 input:focus,
 textarea:focus {
     outline: none;
-    border-color: #b88a59;
-    box-shadow: 0 0 0 3px rgba(184, 138, 89, 0.22);
+    border-color: #955251;
+    box-shadow: 0 0 0 3px rgba(149, 82, 81, 0.22);
 }
 
 button,
@@ -110,7 +147,7 @@ button,
     margin-top: 4px;
     border: 0;
     border-radius: 12px;
-    background: linear-gradient(120deg, #744820 0%, #a67945 100%);
+    background: linear-gradient(120deg, #7a3d4d 0%, #a86472 100%);
     color: #ffffff;
     padding: 12px 16px;
     font: inherit;
@@ -152,5 +189,11 @@ button:hover,
 
     .grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before {
+        animation: none;
     }
 }
