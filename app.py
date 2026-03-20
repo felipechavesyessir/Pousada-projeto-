@@ -32,7 +32,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///sov
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = str(UPLOAD_DIR)
 
-OWNER_WHATSAPP_TO = os.getenv("OWNER_WHATSAPP_TO", "whatsapp:+5531982631228")
+OWNER_WHATSAPP_TO = os.getenv("OWNER_WHATSAPP_TO", "+5531982631228")
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "").strip().rstrip("/")
 
 db.init_app(app)
@@ -217,12 +217,24 @@ def create_reservation() -> Any:
     db.session.add(reserva)
     db.session.commit()
 
-    owner_message = f"Nova reserva recebida de {guest_name}. Segue comprovante anexo."
-    send_whatsapp_message(
+    owner_message = (
+        f"Nova reserva recebida de {guest_name}. "
+        f"Quarto: {room}. "
+        f"Check-in: {checkin.isoformat()} | Check-out: {checkout.isoformat()}. "
+        "Segue comprovante de pagamento em anexo."
+    )
+    owner_to = _normalize_whatsapp(OWNER_WHATSAPP_TO)
+
+    send_sid = send_whatsapp_message(
         message_body=owner_message,
-        to_number=OWNER_WHATSAPP_TO,
+        to_number=owner_to,
         media_url=comprovante_url,
     )
+    if not send_sid:
+        app.logger.warning(
+            "Nao foi possivel enviar comprovante ao proprietario via WhatsApp para %s",
+            owner_to,
+        )
 
     return render_template("success.html")
 
@@ -230,6 +242,17 @@ def create_reservation() -> Any:
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename: str) -> Any:
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+
+@app.route("/uploads/<path:filename>/download")
+@login_required
+def download_uploaded_file(filename: str) -> Any:
+    return send_from_directory(
+        app.config["UPLOAD_FOLDER"],
+        filename,
+        as_attachment=True,
+        download_name=filename,
+    )
 
 
 @app.route("/webhooks/twilio/whatsapp", methods=["POST"])
@@ -321,7 +344,7 @@ def dashboard() -> Any:
 
     return render_template(
         "dashboard.html",
-        reservas=reservas,
+        reservations=reservas,
         pendentes=pendentes,
         confirmados=confirmados,
         receita_total=Decimal(receita_total),

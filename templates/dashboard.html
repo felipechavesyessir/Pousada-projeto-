@@ -38,12 +38,71 @@
             {% endif %}
         {% endwith %}
 
+        <section class="summary-grid" aria-label="Resumo acumulado de reservas">
+            <article class="summary-card">
+                <p class="summary-label">Total de reservas</p>
+                <p class="summary-value">{{ reservations|length }}</p>
+            </article>
+            <article class="summary-card">
+                <p class="summary-label">Pendentes</p>
+                <p class="summary-value">{{ pendentes }}</p>
+            </article>
+            <article class="summary-card">
+                <p class="summary-label">Confirmadas</p>
+                <p class="summary-value">{{ confirmados }}</p>
+            </article>
+            <article class="summary-card">
+                <p class="summary-label">Receita acumulada</p>
+                <p class="summary-value">
+                    R$ {{ "{:,.2f}".format(receita_total).replace(",", "#").replace(".", ",").replace("#", ".") }}
+                </p>
+            </article>
+        </section>
+
+        <section class="pending-panel" aria-label="Reservas pendentes">
+            <div class="pending-header">
+                <h2>Reservas Pendentes</h2>
+                <span class="pending-count">{{ pendentes }} pendente(s)</span>
+            </div>
+            {% set ns = namespace(has_pending=false) %}
+            <ul class="pending-list">
+                {% for reservation in reservations %}
+                    {% if reservation.status == 'pendente' %}
+                        {% set ns.has_pending = true %}
+                        <li>
+                            <div class="pending-item-main">
+                                <strong>#{{ reservation.id }} - {{ reservation.nome }}</strong>
+                                <span>{{ reservation.checkin }} ate {{ reservation.checkout }} | Quarto: {{ reservation.quarto }}</span>
+                            </div>
+                            <div class="pending-item-actions">
+                                <button
+                                    class="small whatsapp manual-whatsapp-btn"
+                                    type="button"
+                                    data-name="{{ reservation.nome }}"
+                                    data-phone="{{ reservation.telefone }}"
+                                >
+                                    Confirmar no WhatsApp
+                                </button>
+                            </div>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            {% if not ns.has_pending %}
+                <p class="pending-empty">Nenhuma reserva pendente no momento.</p>
+            {% endif %}
+        </section>
+
         <section class="panel">
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Hospede</th>
+                        <th>CPF</th>
+                        <th>WhatsApp</th>
+                        <th>Quarto</th>
+                        <th>Entrada (R$)</th>
                         <th>Check-in</th>
                         <th>Check-out</th>
                         <th>Status</th>
@@ -55,6 +114,10 @@
                         <tr>
                             <td>#{{ reservation.id }}</td>
                             <td>{{ reservation.nome }}</td>
+                            <td>{{ reservation.cpf }}</td>
+                            <td>{{ reservation.telefone }}</td>
+                            <td>{{ reservation.quarto }}</td>
+                            <td>{{ '%.2f'|format(reservation.valor_entrada) }}</td>
                             <td>{{ reservation.checkin }}</td>
                             <td>{{ reservation.checkout }}</td>
                             <td>
@@ -68,14 +131,33 @@
                                         data-id="{{ reservation.id }}"
                                         data-name="{{ reservation.nome }}"
                                         data-phone="{{ reservation.telefone }}"
+                                        data-cpf="{{ reservation.cpf }}"
+                                        data-room="{{ reservation.quarto }}"
+                                        data-entry-amount="{{ '%.2f'|format(reservation.valor_entrada) }}"
                                         data-checkin="{{ reservation.checkin }}"
                                         data-checkout="{{ reservation.checkout }}"
                                         data-notes="{{ reservation.observacoes }}"
                                         data-status="{{ reservation.status }}"
                                         data-receipt-url="{{ reservation.comprovante_url_publica }}"
+                                        data-receipt-download-url="{{ url_for('download_uploaded_file', filename=reservation.comprovante_nome_arquivo) if reservation.comprovante_nome_arquivo else '' }}"
                                         data-created="{{ reservation.created_at }}"
                                     >
                                         Detalhes
+                                    </button>
+
+                                    {% if reservation.comprovante_nome_arquivo %}
+                                        <a class="small download" href="{{ url_for('download_uploaded_file', filename=reservation.comprovante_nome_arquivo) }}">Baixar Comprovante</a>
+                                    {% else %}
+                                        <span class="small download disabled" aria-disabled="true">Sem comprovante</span>
+                                    {% endif %}
+
+                                    <button
+                                        class="small whatsapp manual-whatsapp-btn"
+                                        type="button"
+                                        data-name="{{ reservation.nome }}"
+                                        data-phone="{{ reservation.telefone }}"
+                                    >
+                                        Confirmar no WhatsApp
                                     </button>
 
                                     <form method="post" action="{{ url_for('confirmar_entrada', reserva_id=reservation.id) }}">
@@ -92,7 +174,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="6">Nenhuma reserva encontrada.</td>
+                            <td colspan="10">Nenhuma reserva encontrada.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -108,12 +190,16 @@
                 <div><dt>ID</dt><dd id="m-id"></dd></div>
                 <div><dt>Hospede</dt><dd id="m-name"></dd></div>
                 <div><dt>WhatsApp</dt><dd id="m-phone"></dd></div>
+                <div><dt>CPF</dt><dd id="m-cpf"></dd></div>
+                <div><dt>Quarto</dt><dd id="m-room"></dd></div>
+                <div><dt>Valor de entrada</dt><dd id="m-entry"></dd></div>
                 <div><dt>Check-in</dt><dd id="m-checkin"></dd></div>
                 <div><dt>Check-out</dt><dd id="m-checkout"></dd></div>
                 <div><dt>Status</dt><dd id="m-status"></dd></div>
                 <div><dt>Criado em</dt><dd id="m-created"></dd></div>
                 <div><dt>Observacoes</dt><dd id="m-notes"></dd></div>
                 <div><dt>Comprovante</dt><dd><a id="m-receipt" href="#" target="_blank" rel="noopener">Abrir arquivo</a></dd></div>
+                <div><dt>Download</dt><dd><a id="m-receipt-download" href="#">Baixar comprovante</a></dd></div>
             </dl>
         </div>
     </div>
